@@ -62,5 +62,86 @@ namespace Selenium___MsTest
                 driver.Quit();
             }
         }
+
+        [TestMethod]
+        public void Login()
+        {
+            IWebDriver driver = new ChromeDriver();
+
+            try
+            {
+                driver.Navigate().GoToUrl("http://127.0.0.1:5500/index.html");
+
+                // Skriv brugernavn og password
+                driver.FindElement(By.Id("login-username")).SendKeys("admin");
+                driver.FindElement(By.Id("login-password")).SendKeys("Admin123");
+
+                // Klik Login
+                driver.FindElement(By.Id("login-button")).Click();
+
+                Thread.Sleep(1000);
+
+                // Tjek at Logout-knappen er kommet frem
+                var logoutButton = driver.FindElement(By.Id("logout-button"));
+                Assert.IsTrue(logoutButton.Displayed);
+            }
+            finally
+            {
+                driver.Quit();
+            }
+        }
+
+        [TestMethod]
+        public void Login_WithWrongPassword()
+        {
+            IWebDriver driver = new ChromeDriver();
+
+            try
+            {
+                driver.Navigate().GoToUrl("http://127.0.0.1:5500/index.html");
+
+                driver.FindElement(By.Id("login-username")).SendKeys("admin");
+                driver.FindElement(By.Id("login-password")).SendKeys("forkert");
+                driver.FindElement(By.Id("login-button")).Click();
+
+                Thread.Sleep(1000);
+
+                // Fejlbesked vises, og man er ikke logget ind
+                StringAssert.Contains(driver.PageSource, "Authentication failed");
+                Assert.AreEqual(0, driver.FindElements(By.Id("logout-button")).Count);
+            }
+            finally
+            {
+                driver.Quit();
+            }
+        }
+
+        [TestMethod]
+        public void Logout()
+        {
+            IWebDriver driver = new ChromeDriver();
+
+            try
+            {
+                driver.Navigate().GoToUrl("http://127.0.0.1:5500/index.html");
+
+                driver.FindElement(By.Id("login-username")).SendKeys("admin");
+                driver.FindElement(By.Id("login-password")).SendKeys("Admin123");
+                driver.FindElement(By.Id("login-button")).Click();
+
+                Thread.Sleep(1000);
+
+                // Klik Logout
+                driver.FindElement(By.Id("logout-button")).Click();
+
+                // Login-formen er tilbage
+                Assert.AreEqual(1, driver.FindElements(By.Id("login-button")).Count);
+                Assert.AreEqual(0, driver.FindElements(By.Id("logout-button")).Count);
+            }
+            finally
+            {
+                driver.Quit();
+            }
+        }
     }
 }
